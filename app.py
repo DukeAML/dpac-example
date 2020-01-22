@@ -62,12 +62,6 @@ layout = dict(
     paper_bgcolor="#F9F9F9",
     legend=dict(font=dict(size=10), orientation="h"),
     title="Satellite Overview",
-    mapbox=dict(
-        accesstoken=mapbox_access_token,
-        style="light",
-        center=dict(lon=-78.05, lat=42.54),
-        zoom=7,
-    ),
 )
 
 # Create app layout
@@ -229,10 +223,6 @@ app.layout = html.Div(
         ),
         html.Div(
             [
-                html.Div(
-                    [dcc.Graph(id="main_graph")],
-                    className="pretty_container seven columns",
-                ),
             ],
             className="row flex-display",
         ),
@@ -408,15 +398,6 @@ def update_text(data):
 
 
 # Selectors -> main graph
-@app.callback(
-    Output("main_graph", "figure"),
-    [
-        Input("well_statuses", "value"),
-        Input("well_types", "value"),
-        Input("year_slider", "value"),
-    ],
-    [State("lock_selector", "value"), State("main_graph", "relayoutData")],
-)
 def make_main_figure(
     well_statuses, well_types, year_slider, selector, main_graph_layout
 ):
@@ -424,27 +405,6 @@ def make_main_figure(
     dff = filter_dataframe(df, well_statuses, well_types, year_slider)
 
     traces = []
-    for well_type, dfff in dff.groupby("Well_Type"):
-        trace = dict(
-            type="scattermapbox",
-            lon=dfff["Surface_Longitude"],
-            lat=dfff["Surface_latitude"],
-            text=dfff["Well_Name"],
-            customdata=dfff["API_WellNo"],
-            name=WELL_TYPES[well_type],
-            marker=dict(size=4, opacity=0.6),
-        )
-        traces.append(trace)
-
-    # relayoutData is None by default, and {'autosize': True} without relayout action
-    if main_graph_layout is not None and selector is not None and "locked" in selector:
-        if "mapbox.center" in main_graph_layout.keys():
-            lon = float(main_graph_layout["mapbox.center"]["lon"])
-            lat = float(main_graph_layout["mapbox.center"]["lat"])
-            zoom = float(main_graph_layout["mapbox.zoom"])
-            layout["mapbox"]["center"]["lon"] = lon
-            layout["mapbox"]["center"]["lat"] = lat
-            layout["mapbox"]["zoom"] = zoom
 
     figure = dict(data=traces, layout=layout)
     return figure
@@ -658,7 +618,7 @@ def make_count_figure(well_statuses, well_types, year_slider):
         ),
     ]
 
-    layout_count["title"] = "Concession Sales/Day"
+    layout_count["title"] = "Concession Sales/Year"
     layout_count["dragmode"] = "select"
     layout_count["showlegend"] = False
     layout_count["autosize"] = True
