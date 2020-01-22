@@ -50,7 +50,7 @@ dataset = trim.to_dict(orient="index")
 points = pickle.load(open(DATA_PATH.joinpath("points.pkl"), "rb"))
 
 
-# Create global chart template
+ # Create global chart template
 mapbox_access_token = "pk.eyJ1IjoiamFja2x1byIsImEiOiJjajNlcnh3MzEwMHZtMzNueGw3NWw5ZXF5In0.fk8k06T96Ml9CLGgKmk81w"
 
 layout = dict(
@@ -232,23 +232,6 @@ app.layout = html.Div(
                 html.Div(
                     [dcc.Graph(id="main_graph")],
                     className="pretty_container seven columns",
-                ),
-                html.Div(
-                    [dcc.Graph(id="individual_graph")],
-                    className="pretty_container five columns",
-                ),
-            ],
-            className="row flex-display",
-        ),
-        html.Div(
-            [
-                html.Div(
-                    [dcc.Graph(id="pie_graph")],
-                    className="pretty_container seven columns",
-                ),
-                html.Div(
-                    [dcc.Graph(id="aggregate_graph")],
-                    className="pretty_container five columns",
                 ),
             ],
             className="row flex-display",
@@ -468,7 +451,6 @@ def make_main_figure(
 
 
 # Main graph -> individual graph
-@app.callback(Output("individual_graph", "figure"), [Input("main_graph", "hoverData")])
 def make_individual_figure(main_graph_hover):
 
     layout_individual = copy.deepcopy(layout)
@@ -531,16 +513,6 @@ def make_individual_figure(main_graph_hover):
     return figure
 
 
-# Selectors, main graph -> aggregate graph
-@app.callback(
-    Output("aggregate_graph", "figure"),
-    [
-        Input("well_statuses", "value"),
-        Input("well_types", "value"),
-        Input("year_slider", "value"),
-        Input("main_graph", "hoverData"),
-    ],
-)
 def make_aggregate_figure(well_statuses, well_types, year_slider, main_graph_hover):
 
     layout_aggregate = copy.deepcopy(layout)
@@ -590,16 +562,6 @@ def make_aggregate_figure(well_statuses, well_types, year_slider, main_graph_hov
     figure = dict(data=data, layout=layout_aggregate)
     return figure
 
-
-# Selectors, main graph -> pie graph
-@app.callback(
-    Output("pie_graph", "figure"),
-    [
-        Input("well_statuses", "value"),
-        Input("well_types", "value"),
-        Input("year_slider", "value"),
-    ],
-)
 def make_pie_figure(well_statuses, well_types, year_slider):
 
     layout_pie = copy.deepcopy(layout)
