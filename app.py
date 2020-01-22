@@ -421,7 +421,7 @@ def update_well_text(well_statuses, well_types, year_slider):
     [Input("aggregate_data", "data")],
 )
 def update_text(data):
-    return data[0] + " mcf", data[1] + " bbl", data[2] + " bbl"
+    return data[0] , data[1]  , data[2] 
 
 
 # Selectors -> main graph
@@ -696,7 +696,7 @@ def make_count_figure(well_statuses, well_types, year_slider):
         ),
     ]
 
-    layout_count["title"] = "Completed Wells/Year"
+    layout_count["title"] = "Concession Sales/Day"
     layout_count["dragmode"] = "select"
     layout_count["showlegend"] = False
     layout_count["autosize"] = True
