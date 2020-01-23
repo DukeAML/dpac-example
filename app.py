@@ -226,6 +226,16 @@ app.layout = html.Div(
             ],
             className="row flex-display",
         ),
+
+        html.Div(
+            [
+                html.Div(
+                    [dcc.Graph(id="pie_graph")],
+                    className="pretty_container seven columns",
+                ),
+            ],
+            className="row flex-display",
+        ),
     ],
     id="mainContainer",
     style={"display": "flex", "flex-direction": "column"},
@@ -626,7 +636,63 @@ def make_count_figure(well_statuses, well_types, year_slider):
     figure = dict(data=data, layout=layout_count)
     return figure
 
+# Selectors, main graph -> pie graph
+@app.callback(
+    Output("pie_graph", "figure"),
+    [
+        Input("well_statuses", "value"),
+        Input("well_types", "value"),
+        Input("year_slider", "value"),
+    ],
+)
+def make_pie_figure(well_statuses, well_types, year_slider):
 
+    layout_pie = copy.deepcopy(layout)
+
+    dff = filter_dataframe(df, well_statuses, well_types, year_slider)
+
+    selected = dff["API_WellNo"].values
+    index, gas, oil, water = produce_aggregate(selected, year_slider)
+
+    aggregate = dff.groupby(["Well_Type"]).count()
+
+    data = [
+        dict(
+            type="pie",
+            labels=["eTicket", "In-Person", "Resale"],
+            values=[sum(gas), sum(oil), sum(water)],
+            name="Production Breakdown",
+            text=[
+                "Total $ from eTicket Sales",
+                "Total $ from In-Person Ticket Sales",
+                "Total $ from Verified Ticket Resales",
+            ],
+            hoverinfo="text+value+percent",
+            textinfo="label+percent+name",
+            hole=0.5,
+            marker=dict(colors=["#fac1b7", "#a9bb95", "#92d8d8"]),
+            domain={"x": [0, 0.45], "y": [0.2, 0.8]},
+        ),
+        dict(
+            type="pie",
+            labels=[WELL_TYPES[i] for i in aggregate.index],
+            values=aggregate["API_WellNo"],
+            name="Well Type Breakdown",
+            hoverinfo="label+text+value+percent",
+            textinfo="label+percent+name",
+            hole=0.5,
+            marker=dict(colors=[WELL_COLORS[i] for i in aggregate.index]),
+            domain={"x": [0.55, 1], "y": [0.2, 0.8]},
+        ),
+    ]
+    layout_pie["title"] = "Revenue Summary (Tickets & Concessions)"
+    layout_pie["font"] = dict(color="#777777")
+    layout_pie["legend"] = dict(
+        font=dict(color="#CCCCCC", size="10"), orientation="h", bgcolor="rgba(0,0,0,0)"
+    )
+
+    figure = dict(data=data, layout=layout_pie)
+    return figure
 # Main
 if __name__ == "__main__":
     app.run_server(debug=True)
