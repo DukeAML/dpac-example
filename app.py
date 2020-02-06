@@ -693,6 +693,8 @@ def make_pie_figure(well_statuses, well_types, year_slider):
 
     figure = dict(data=data, layout=layout_pie)
     return figure
+    
 # Main
 if __name__ == "__main__":
     app.run_server(debug=True)
+
